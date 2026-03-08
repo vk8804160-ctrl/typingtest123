@@ -24,7 +24,76 @@ border-radius:12px;
 width:700px;
 box-shadow:0 0 25px rgba(0,0,0,0.5);
 }
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1e3d59;
+  padding: 10px 20px;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
+.navbar .logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.navbar .nav-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar .nav-links li {
+  margin-left: 20px;
+}
+
+.navbar .nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.navbar .nav-links li a:hover {
+  color: #ffcd3c;
+}
+
+.menu-icon {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* Mobile Responsive */
+@media screen and (max-width: 768px) {
+  .navbar .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: #1e3d59;
+    position: absolute;
+    top: 60px;
+    left: 0;
+  }
+
+  .navbar .nav-links li {
+    margin: 15px 0;
+    text-align: center;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+
+  #menu-toggle:checked + .menu-icon + .nav-links {
+    display: flex;
+  }
+}
 h1{
 text-align:center;
 margin-bottom:20px;
@@ -76,7 +145,19 @@ background:#16a34a;
 </head>
 
 <body>
-
+<!-- Navbar Start -->
+<nav class="navbar">
+  <div class="logo">Krutidev Converter</div>
+  <input type="checkbox" id="menu-toggle">
+  <label for="menu-toggle" class="menu-icon">&#9776;</label>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#privacy">Privacy Policy</a></li>
+  </ul>
+</nav>
+<!-- Navbar End -->
 <div class="container">
 
 <h1>⌨️ Professional Typing Test</h1>
