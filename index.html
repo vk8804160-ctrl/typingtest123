@@ -1,250 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pro Typing Test</title>
+
+<title> VIKAS TYPING TUTOR</title>
 
 <style>
-/* Navbar Styles */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #1e3d59;
-  padding: 10px 20px;
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
 
-.navbar .logo {
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.navbar .nav-links {
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-
-.navbar .nav-links li {
-  margin-left: 20px;
-}
-
-.navbar .nav-links li a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-}
-
-.navbar .nav-links li a:hover {
-  color: #ffcd3c;
-}
-
-.menu-icon {
-  display: none;
-  font-size: 28px;
-  cursor: pointer;
-}
-
-/* Mobile Responsive */
-@media screen and (max-width: 768px) {
-  .navbar .nav-links {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    background-color: #1e3d59;
-    position: absolute;
-    top: 60px;
-    left: 0;
-  }
-
-  .navbar .nav-links li {
-    margin: 15px 0;
-    text-align: center;
-  }
-
-  .menu-icon {
-    display: block;
-  }
-
-  #menu-toggle:checked + .menu-icon + .nav-links {
-    display: flex;
-  }
-}
 body{
-font-family: Arial, Helvetica, sans-serif;
-background: linear-gradient(135deg,#141e30,#243b55);
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
+font-family: Arial;
+background:#f4f6fb;
+padding:20px;
 }
 
 .container{
-background:#1f2937;
-padding:40px;
-border-radius:12px;
-width:700px;
-box-shadow:0 0 25px rgba(0,0,0,0.5);
+display:flex;
+gap:20px;
 }
 
-h1{
-text-align:center;
-margin-bottom:20px;
+.left{
+width:70%;
 }
 
-.text-box{
-background:#111827;
-padding:20px;
-border-radius:8px;
-font-size:18px;
-line-height:1.6;
-margin-bottom:20px;
+.right{
+width:30%;
 }
 
 textarea{
 width:100%;
-height:120px;
-border:none;
-border-radius:8px;
-padding:15px;
-font-size:16px;
-outline:none;
-}
-
-.stats{
-display:flex;
-justify-content:space-between;
-margin-top:15px;
+height:160px;
 font-size:18px;
+padding:10px;
 }
 
 button{
-margin-top:20px;
-width:100%;
-padding:12px;
-border:none;
-background:#22c55e;
-color:white;
-font-size:16px;
-border-radius:6px;
-cursor:pointer;
+padding:10px 20px;
+margin-top:10px;
 }
 
-button:hover{
-background:#16a34a;
+.storyBtn{
+display:block;
+margin:5px 0;
+width:100%;
+}
+
+canvas{
+background:#111;
+border-radius:50%;
 }
 
 </style>
+
 </head>
 
 <body>
 
+<div id="login">
+
+<h2>Enter Your Name</h2>
+
+<input type="text" id="username" placeholder="Enter name">
+
+<button onclick="start()">Start Test</button>
+
+</div>
+
+
+<div id="test" style="display:none">
+
+<h2 id="welcome"></h2>
+
+<select id="font">
+<option value="Kruti Dev 010">KrutiDev</option>
+<option value="Remington">Remington</option>
+<option value="Mangal">Mangal</option>
+<option value="Times New Roman">Times New Roman</option>
+<option value="Arial">Unicode</option>
+</select>
+
+<select id="time">
+<option value="1">1 Minute</option>
+<option value="2">2 Minute</option>
+<option value="5">5 Minute</option>
+<option value="10">10 Minute</option>
+<option value="20">20 Minute</option>
+</select>
+
 <div class="container">
 
-<h1>⌨️ Professional Typing Test</h1>
-<!-- Navbar Start -->
-<nav class="navbar">
-  <div class="logo">Krutidev Converter</div>
-  <input type="checkbox" id="menu-toggle">
-  <label for="menu-toggle" class="menu-icon">&#9776;</label>
-  <ul class="nav-links">
-    <li><a href="#home">Home</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#tools">Tools</a></li>
-    <li><a href="#privacy">Privacy Policy</a></li>
-  </ul>
-</nav>
-<!-- Navbar End -->
-<div class="text-box" id="textDisplay">
-Typing speed is an important skill for students programmers and professionals. 
-Regular practice improves typing accuracy speed and productivity. vikas kumar 
-</div>
+<div class="left">
 
-<textarea id="inputText" placeholder="Start typing here..."></textarea>
+<p id="storyBox"></p>
 
-<div class="stats">
-<div>⏱ Time: <span id="time">60</span>s</div>
-<div>⚡ WPM: <span id="wpm">0</span></div>
-<div>🎯 Accuracy: <span id="accuracy">0</span>%</div>
-</div>
+<textarea id="typingArea"></textarea>
 
-<button onclick="restartTest()">Restart Test</button>
+<button onclick="finish()">Finish</button>
 
 </div>
+
+<div class="right">
+
+<canvas id="speed" width="200" height="200"></canvas>
+
+<div id="storyList"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
-let timer = 60;
-let interval;
-let started = false;
+let startTime;
 
-const textDisplay = document.getElementById("textDisplay").innerText;
-const inputText = document.getElementById("inputText");
+const stories=[
 
-inputText.addEventListener("input",startTyping);
+"भारत एक महान देश है जहाँ अनेक संस्कृतियाँ रहती हैं।",
 
-function startTyping(){
+"Typing practice improves speed and accuracy.",
 
-if(!started){
-started=true;
-interval=setInterval(updateTimer,1000);
+"Hard work is the key to success.",
+
+"Technology makes life easier.",
+
+"Programming builds amazing software.",
+
+"Success comes from dedication.",
+
+"Learning never stops.",
+
+"Practice typing everyday to improve.",
+
+"India is growing rapidly in technology.",
+
+"Education changes the future.",
+
+"Keyboard typing helps office work.",
+
+"Data entry jobs need fast typing.",
+
+"Computers are essential today.",
+
+"Typing websites help students.",
+
+"JavaScript makes websites interactive.",
+
+"HTML builds webpage structure.",
+
+"CSS designs the layout.",
+
+"Speed and accuracy both matter.",
+
+"Focus improves performance.",
+
+"Consistency leads to mastery."
+
+];
+
+
+function start(){
+
+let name=document.getElementById("username").value;
+
+document.getElementById("login").style.display="none";
+
+document.getElementById("test").style.display="block";
+
+document.getElementById("welcome").innerText="Welcome "+name;
+
+startTime=new Date();
+
+loadStories();
+
 }
 
-calculateStats();
+
+function loadStories(){
+
+let list=document.getElementById("storyList");
+
+stories.forEach((s,i)=>{
+
+let btn=document.createElement("button");
+
+btn.innerText="Story "+(i+1);
+
+btn.className="storyBtn";
+
+btn.onclick=()=>{
+
+document.getElementById("storyBox").innerText=s;
+
+};
+
+list.appendChild(btn);
+
+});
 
 }
 
-function updateTimer(){
 
-timer--;
-document.getElementById("time").innerText = timer;
+function finish(){
 
-if(timer==0){
-clearInterval(interval);
-inputText.disabled=true;
-}
+let text=document.getElementById("typingArea").value;
 
-}
+let end=new Date();
 
-function calculateStats(){
+let minutes=(end-startTime)/60000;
 
-let typed = inputText.value;
-let words = typed.trim().split(" ").length;
+let words=text.split(" ").length;
 
-let wpm = Math.round(words/(60-timer)*60);
+let speed=Math.round(words/minutes);
 
-if(!isFinite(wpm)) wpm=0;
+drawSpeed(speed);
 
-document.getElementById("wpm").innerText = wpm;
-
-let correct = 0;
-
-for(let i=0;i<typed.length;i++){
-
-if(typed[i] === textDisplay[i]){
-correct++;
-}
+generatePDF(speed);
 
 }
 
-let accuracy = Math.round((correct/typed.length)*100);
 
-if(!isFinite(accuracy)) accuracy=0;
+function drawSpeed(speed){
 
-document.getElementById("accuracy").innerText = accuracy;
+let c=document.getElementById("speed");
+
+let ctx=c.getContext("2d");
+
+ctx.clearRect(0,0,200,200);
+
+ctx.fillStyle="white";
+
+ctx.font="30px Arial";
+
+ctx.fillText(speed+" WPM",40,110);
 
 }
 
-function restartTest(){
 
-location.reload();
+function generatePDF(speed){
+
+const { jsPDF } = window.jspdf;
+
+let doc=new jsPDF();
+
+doc.setFontSize(22);
+
+doc.text("Typing Test Result",20,20);
+
+doc.setFontSize(14);
+
+doc.text("Speed: "+speed+" WPM",20,40);
+
+doc.save("typing-result.pdf");
 
 }
 
