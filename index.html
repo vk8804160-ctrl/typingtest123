@@ -21,6 +21,10 @@ margin:0;
 padding:20px;
 }
 
+h2{
+margin-top:0;
+}
+
 .container{
 display:flex;
 flex-wrap:wrap;
@@ -43,7 +47,6 @@ padding:10px;
 border-radius:6px;
 margin-bottom:10px;
 min-height:70px;
-font-family:Arial;
 }
 
 #highlight{
@@ -52,7 +55,6 @@ padding:10px;
 border-radius:6px;
 margin-bottom:10px;
 min-height:70px;
-font-family:Arial;
 }
 
 textarea{
@@ -80,8 +82,13 @@ margin:3px 0;
 background:#333;
 }
 
-.correct{color:green;}
-.wrong{color:red;}
+.correct{
+color:green;
+}
+
+.wrong{
+color:red;
+}
 
 canvas{
 background:#111;
@@ -99,6 +106,18 @@ background:white;
 margin-top:10px;
 padding:10px;
 border-radius:6px;
+}
+
+@media(max-width:850px){
+
+.container{
+flex-direction:column;
+}
+
+.right{
+width:100%;
+}
+
 }
 
 </style>
@@ -196,9 +215,10 @@ let startTime
 let originalText=""
 let timerInterval
 let timeLeft
-let timerStarted=false
 
 const stories=[
+
+"भारत एक महान देश है जहाँ अनेक संस्कृतियाँ रहती हैं।",
 
 "Typing practice improves speed and accuracy.",
 
@@ -221,27 +241,36 @@ function startTest(){
 let name=document.getElementById("username").value
 
 if(name==""){
+
 alert("Enter Name")
+
 return
+
 }
 
 document.getElementById("login").style.display="none"
+
 document.getElementById("test").style.display="block"
 
 document.getElementById("welcome").innerText="Welcome "+name
 
+let font=document.getElementById("fontSelect").value
+
+document.getElementById("typingArea").style.fontFamily=font
+document.getElementById("storyBox").style.fontFamily=font
+document.getElementById("highlight").style.fontFamily=font
+
+timeLeft=document.getElementById("timeSelect").value*60
+
+startTimer()
+
 loadStories()
+
 loadLeaderboard()
 
 }
 
 function startTimer(){
-
-if(timerStarted) return
-
-timerStarted=true
-
-timeLeft=document.getElementById("timeSelect").value*60
 
 document.getElementById("timer").innerText="Time Left "+timeLeft
 
@@ -280,16 +309,12 @@ btn.onclick=function(){
 originalText=text
 
 document.getElementById("storyBox").innerText=text
+
 document.getElementById("highlight").innerHTML=text
 
 document.getElementById("typingArea").value=""
 
 startTime=new Date()
-
-let font=document.getElementById("fontSelect").value
-document.getElementById("typingArea").style.fontFamily=font
-
-startTimer()
 
 }
 
@@ -304,21 +329,29 @@ document.getElementById("typingArea").addEventListener("input",function(){
 let typed=this.value
 
 let result=""
+
 let correct=0
 
 for(let i=0;i<originalText.length;i++){
 
 if(typed[i]==null){
+
 result+=originalText[i]
+
 }
 
 else if(typed[i]==originalText[i]){
+
 result+="<span class='correct'>"+originalText[i]+"</span>"
+
 correct++
+
 }
 
 else{
+
 result+="<span class='wrong'>"+originalText[i]+"</span>"
+
 }
 
 }
@@ -352,21 +385,31 @@ let ctx=canvas.getContext("2d")
 ctx.clearRect(0,0,200,200)
 
 ctx.beginPath()
+
 ctx.arc(100,100,80,0,Math.PI*2)
+
 ctx.strokeStyle="#555"
+
 ctx.lineWidth=10
+
 ctx.stroke()
 
 let angle=(speed/120)*Math.PI
 
 ctx.beginPath()
+
 ctx.arc(100,100,80,Math.PI,Math.PI+angle)
+
 ctx.strokeStyle="lime"
+
 ctx.lineWidth=10
+
 ctx.stroke()
 
 ctx.fillStyle="white"
+
 ctx.font="20px Arial"
+
 ctx.fillText(speed+" WPM",60,110)
 
 }
@@ -376,10 +419,13 @@ function finishTest(){
 clearInterval(timerInterval)
 
 let name=document.getElementById("username").value
+
 let speed=parseInt(document.getElementById("wpm").innerText)
 
 saveScore(name,speed)
+
 downloadPDF(name,speed)
+
 loadLeaderboard()
 
 }
@@ -405,7 +451,9 @@ let scores=JSON.parse(localStorage.getItem("scores")||"[]")
 let html=""
 
 scores.forEach(s=>{
+
 html+=s.name+" - "+s.speed+" WPM<br>"
+
 })
 
 document.getElementById("scores").innerHTML=html
@@ -419,8 +467,11 @@ const { jsPDF } = window.jspdf
 let doc=new jsPDF()
 
 doc.text("Typing Test Result",20,20)
+
 doc.text("Name: "+name,20,40)
+
 doc.text("Speed: "+speed+" WPM",20,60)
+
 doc.text("Date: "+new Date().toLocaleDateString(),20,80)
 
 doc.save(name+"_typing_result.pdf")
