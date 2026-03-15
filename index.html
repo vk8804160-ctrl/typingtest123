@@ -4,7 +4,8 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vikash Typing Tutor</title>
+
+<title>JR Advanced Typing Tutor</title>
 
 <style>
 
@@ -17,7 +18,11 @@ body{
 font-family:Arial;
 background:#eef1f7;
 margin:0;
-padding:15px;
+padding:20px;
+}
+
+h2{
+margin-top:0;
 }
 
 .container{
@@ -32,24 +37,24 @@ min-width:300px;
 }
 
 .right{
-width:260px;
+width:280px;
 text-align:center;
 }
 
 #storyBox{
 background:white;
 padding:10px;
-min-height:70px;
-margin-bottom:10px;
 border-radius:6px;
+margin-bottom:10px;
+min-height:70px;
 }
 
 #highlight{
 background:white;
 padding:10px;
-min-height:70px;
 border-radius:6px;
 margin-bottom:10px;
+min-height:70px;
 }
 
 textarea{
@@ -62,7 +67,7 @@ border-radius:6px;
 
 button{
 padding:10px 15px;
-margin-top:10px;
+margin-top:8px;
 cursor:pointer;
 border:none;
 background:#4b6cff;
@@ -73,12 +78,17 @@ border-radius:5px;
 .storyBtn{
 display:block;
 width:100%;
-margin:4px 0;
+margin:3px 0;
 background:#333;
 }
 
-.correct{color:green;}
-.wrong{color:red;}
+.correct{
+color:green;
+}
+
+.wrong{
+color:red;
+}
 
 canvas{
 background:#111;
@@ -88,7 +98,26 @@ margin-top:10px;
 
 select{
 padding:8px;
-margin:5px;
+margin:4px;
+}
+
+#leaderboard{
+background:white;
+margin-top:10px;
+padding:10px;
+border-radius:6px;
+}
+
+@media(max-width:850px){
+
+.container{
+flex-direction:column;
+}
+
+.right{
+width:100%;
+}
+
 }
 
 </style>
@@ -99,17 +128,17 @@ margin:5px;
 
 <div id="login">
 
-<h2>Enter Your Name</h2>
+<h2>JR Typing Test</h2>
 
-<input type="text" id="username" placeholder="Enter name">
+<input id="username" placeholder="Enter Name">
 
 <br><br>
 
-<label>Font Select</label>
+<label>Font</label>
 
 <select id="fontSelect">
 
-<option value="KrutiDev">KrutiDev 010</option>
+<option value="KrutiDev">KrutiDev</option>
 <option value="Mangal">Mangal</option>
 <option value="Times New Roman">Times New Roman</option>
 
@@ -164,6 +193,14 @@ margin:5px;
 
 <div id="storyList"></div>
 
+<div id="leaderboard">
+
+<h3>Leaderboard</h3>
+
+<div id="scores"></div>
+
+</div>
+
 </div>
 
 </div>
@@ -176,7 +213,7 @@ margin:5px;
 
 let startTime
 let originalText=""
-let timer
+let timerInterval
 let timeLeft
 
 const stories=[
@@ -189,7 +226,13 @@ const stories=[
 
 "Technology makes life easier.",
 
-"Programming builds amazing software."
+"Programming builds amazing software.",
+
+"Success comes from dedication.",
+
+"Learning never stops.",
+
+"Practice typing everyday to improve."
 
 ]
 
@@ -198,11 +241,15 @@ function startTest(){
 let name=document.getElementById("username").value
 
 if(name==""){
+
 alert("Enter Name")
+
 return
+
 }
 
 document.getElementById("login").style.display="none"
+
 document.getElementById("test").style.display="block"
 
 document.getElementById("welcome").innerText="Welcome "+name
@@ -213,29 +260,29 @@ document.getElementById("typingArea").style.fontFamily=font
 document.getElementById("storyBox").style.fontFamily=font
 document.getElementById("highlight").style.fontFamily=font
 
-let time=document.getElementById("timeSelect").value
-
-timeLeft=time*60
+timeLeft=document.getElementById("timeSelect").value*60
 
 startTimer()
 
 loadStories()
 
+loadLeaderboard()
+
 }
 
 function startTimer(){
 
-document.getElementById("timer").innerText="Time Left "+timeLeft+" sec"
+document.getElementById("timer").innerText="Time Left "+timeLeft
 
-timer=setInterval(function(){
+timerInterval=setInterval(function(){
 
 timeLeft--
 
-document.getElementById("timer").innerText="Time Left "+timeLeft+" sec"
+document.getElementById("timer").innerText="Time Left "+timeLeft
 
 if(timeLeft<=0){
 
-clearInterval(timer)
+clearInterval(timerInterval)
 
 finishTest()
 
@@ -262,6 +309,7 @@ btn.onclick=function(){
 originalText=text
 
 document.getElementById("storyBox").innerText=text
+
 document.getElementById("highlight").innerHTML=text
 
 document.getElementById("typingArea").value=""
@@ -281,6 +329,7 @@ document.getElementById("typingArea").addEventListener("input",function(){
 let typed=this.value
 
 let result=""
+
 let correct=0
 
 for(let i=0;i<originalText.length;i++){
@@ -309,15 +358,13 @@ result+="<span class='wrong'>"+originalText[i]+"</span>"
 
 document.getElementById("highlight").innerHTML=result
 
-let endTime=new Date()
+let minutes=(new Date()-startTime)/60000
 
-let minutes=(endTime-startTime)/60000
-
-let words=typed.split(" ").length
+let words=typed.trim().split(/\s+/).length
 
 let speed=Math.round(words/minutes)
 
-if(speed<0) speed=0
+if(!isFinite(speed)) speed=0
 
 document.getElementById("wpm").innerText=speed+" WPM"
 
@@ -342,7 +389,9 @@ ctx.beginPath()
 ctx.arc(100,100,80,0,Math.PI*2)
 
 ctx.strokeStyle="#555"
+
 ctx.lineWidth=10
+
 ctx.stroke()
 
 let angle=(speed/120)*Math.PI
@@ -352,21 +401,66 @@ ctx.beginPath()
 ctx.arc(100,100,80,Math.PI,Math.PI+angle)
 
 ctx.strokeStyle="lime"
+
 ctx.lineWidth=10
+
 ctx.stroke()
 
 ctx.fillStyle="white"
+
 ctx.font="20px Arial"
+
 ctx.fillText(speed+" WPM",60,110)
 
 }
 
 function finishTest(){
 
-clearInterval(timer)
+clearInterval(timerInterval)
 
 let name=document.getElementById("username").value
-let speed=document.getElementById("wpm").innerText
+
+let speed=parseInt(document.getElementById("wpm").innerText)
+
+saveScore(name,speed)
+
+downloadPDF(name,speed)
+
+loadLeaderboard()
+
+}
+
+function saveScore(name,speed){
+
+let scores=JSON.parse(localStorage.getItem("scores")||"[]")
+
+scores.push({name:name,speed:speed})
+
+scores.sort((a,b)=>b.speed-a.speed)
+
+scores=scores.slice(0,5)
+
+localStorage.setItem("scores",JSON.stringify(scores))
+
+}
+
+function loadLeaderboard(){
+
+let scores=JSON.parse(localStorage.getItem("scores")||"[]")
+
+let html=""
+
+scores.forEach(s=>{
+
+html+=s.name+" - "+s.speed+" WPM<br>"
+
+})
+
+document.getElementById("scores").innerHTML=html
+
+}
+
+function downloadPDF(name,speed){
 
 const { jsPDF } = window.jspdf
 
@@ -376,9 +470,11 @@ doc.text("Typing Test Result",20,20)
 
 doc.text("Name: "+name,20,40)
 
-doc.text("Speed: "+speed,20,60)
+doc.text("Speed: "+speed+" WPM",20,60)
 
-doc.save(name+"_result.pdf")
+doc.text("Date: "+new Date().toLocaleDateString(),20,80)
+
+doc.save(name+"_typing_result.pdf")
 
 }
 
