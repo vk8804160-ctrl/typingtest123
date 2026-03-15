@@ -4,31 +4,34 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JR Typing System</title>
 
-<title>Vikash Advanced Typing Tutor</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
 @font-face{
 font-family:"KrutiDev";
-src:url("KrutiDev010.ttf");
+src:url("KrutiDev010.ttf") format("truetype");
+font-display:swap;
 }
 
 body{
 font-family:Arial;
 background:#eef1f7;
+padding:15px;
 margin:0;
-padding:20px;
 }
 
 h2{
-margin-top:0;
+text-align:center;
 }
 
 .container{
 display:flex;
-flex-wrap:wrap;
 gap:20px;
+flex-wrap:wrap;
 }
 
 .left{
@@ -37,78 +40,67 @@ min-width:300px;
 }
 
 .right{
-width:280px;
-text-align:center;
-}
-
-#storyBox{
+width:300px;
 background:white;
-padding:10px;
-border-radius:6px;
-margin-bottom:10px;
-min-height:70px;
+padding:15px;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 #highlight{
 background:white;
-padding:10px;
+padding:15px;
 border-radius:6px;
-margin-bottom:10px;
-min-height:70px;
+font-size:20px;
+min-height:120px;
+border:1px solid #ccc;
+line-height:32px;
 }
 
-textarea{
+#typingArea{
 width:100%;
-height:150px;
-font-size:18px;
+height:160px;
+font-size:20px;
 padding:10px;
+margin-top:10px;
 border-radius:6px;
+resize:none;
+border:1px solid #ccc;
 }
 
 button{
 padding:10px 15px;
-margin-top:8px;
-cursor:pointer;
-border:none;
+margin:5px;
 background:#4b6cff;
+border:none;
 color:white;
+cursor:pointer;
 border-radius:5px;
 }
 
-.storyBtn{
-display:block;
-width:100%;
-margin:3px 0;
-background:#333;
-}
-
 .correct{
-color:green;
+background:#b8ffb8;
 }
 
 .wrong{
-color:red;
+background:#ffb8b8;
 }
 
-canvas{
-background:#111;
-border-radius:50%;
-margin-top:10px;
+#graph{
+margin-top:20px;
 }
 
-select{
-padding:8px;
+.controls{
+text-align:center;
+margin-bottom:15px;
+}
+
+input,select{
+padding:6px;
 margin:4px;
 }
 
-#leaderboard{
-background:white;
-margin-top:10px;
-padding:10px;
-border-radius:6px;
-}
-
-@media(max-width:850px){
+@media(max-width:768px){
 
 .container{
 flex-direction:column;
@@ -126,237 +118,181 @@ width:100%;
 
 <body>
 
-<div id="login">
+<h2>VIKAS Typing Platform</h2>
 
-<h2>Vikash Typing Tutor Test</h2>
+<div class="controls">
 
 <input id="username" placeholder="Enter Name">
 
-<br><br>
-
-<label>Font</label>
-
-<select id="fontSelect">
-
+<select id="fontSelect" onchange="loadTests()">
+<option value="Arial">English</option>
 <option value="KrutiDev">KrutiDev</option>
-<option value="Mangal">Mangal</option>
-<option value="Times New Roman">Times New Roman</option>
+</select>
 
+<select id="testSelect"></select>
+
+<select id="timeSelect">
+<option value="60">1 Minute</option>
+<option value="120">2 Minute</option>
+<option value="300">5 Minute</option>
 </select>
 
 <br>
 
-<label>Timer</label>
-
-<select id="timeSelect">
-
-<option value="1">1 Minute</option>
-<option value="2">2 Minute</option>
-<option value="5">5 Minute</option>
-<option value="10">10 Minute</option>
-
-</select>
-
-<br><br>
-
-<button onclick="startTest()">Start Test</button>
+<button onclick="startTest()">Start</button>
+<button onclick="finishTest()">Finish</button>
+<button onclick="downloadPDF()">Download PDF</button>
 
 </div>
-
-<div id="test" style="display:none">
-
-<h2 id="welcome"></h2>
 
 <div class="container">
 
 <div class="left">
 
-<div id="storyBox"></div>
-
 <div id="highlight"></div>
 
 <textarea id="typingArea"></textarea>
-
-<button onclick="finishTest()">Finish Test</button>
 
 </div>
 
 <div class="right">
 
-<canvas id="speedometer" width="200" height="200"></canvas>
-
+<h3 id="timer">Time 0</h3>
 <h3 id="wpm">0 WPM</h3>
+<h3 id="accuracy">Accuracy 100%</h3>
 
-<h4 id="accuracy">Accuracy 100%</h4>
-
-<h4 id="timer"></h4>
-
-<div id="storyList"></div>
-
-<div id="leaderboard">
-
-<h3>Leaderboard</h3>
-
-<div id="scores"></div>
+<canvas id="graph"></canvas>
 
 </div>
 
 </div>
-
-</div>
-
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
-let startTime
-let originalText=""
-let timerInterval
-let timeLeft
+/* ---------------- English Stories ---------------- */
 
-const stories=[
+let englishTests=[
 
-"भारत एक ऐसा देश है जिसकी पहचान उसकी विविधता, संस्कृति, इतिहास और महान परंपराओं से होती है। यह देश केवल भौगोलिक रूप से ही बड़ा नहीं है, बल्कि अपनी सभ्यता और संस्कृति के कारण भी दुनिया में विशेष स्थान रखता है। मतदान का अधिकार है और लोग अपने प्रतिनिधियों को चुनते हैं। देश में विभिन्न राजनीतिक दल होते हुए भी लोकतांत्रिक व्यवस्था सुचारू रूप से चलती है। न्यायपालिका, विधायिका और कार्यपालिका मिलकर देश की व्यवस्था को संतुलित बनाए रखते हैं अंत में यह कहा जा सकता है कि भारत केवल एक देश नहीं, बल्कि एक विचार है। यह विचार है एकता, शांति, सहिष्णुता और प्रगति का। यहाँ की संस्कृति, इतिहास, परंपराएँ और आधुनिक उपलब्धियाँ मिलकर भारत को एक महान राष्ट्र बनाती हैं। हर भारतीय का कर्तव्य है कि वह अपने देश से प्रेम करे, उसकी संस्कृति का सम्मान करे और उसके विकास में योगदान दे। जब सभी लोग मिलकर ईमानदारी और मेहनत से काम करेंगे, तब भारत और भी अधिक शक्तिशाली और समृद्ध बनेगा इस प्रकार भारत सचमुच एक महान देश है, जो अपनी विविधता, संस्कृति, इतिहास और प्रगति के कारण पूरी दुनिया में सम्मान और गौरव का स्थान रखता है।",
+`Typing practice is one of the most important skills in the digital world today. 
+Students and professionals use typing every day while working on computers. 
+A person who types faster can complete work quickly and efficiently. 
+Typing tests help measure speed and accuracy. 
+Daily typing practice improves productivity and confidence. 
+Many government and private jobs require typing tests. 
+Accuracy is very important while typing documents. 
+Regular practice helps increase typing speed gradually. 
+Typing is also useful for writing emails, documents, and reports. 
+With consistent effort anyone can improve typing speed and accuracy.`,
 
-"Typing practice improves speed and accuracy.",
-
-"Hard work is the key to success.",
-
-"Technology makes life easier.",
-
-"Programming builds amazing software.",
-
-"Success comes from dedication.",
-
-"Learning never stops.",
-
-"Practice typing everyday to improve."
+`Technology is changing our lives rapidly. 
+Computers and the internet are essential tools today. 
+Typing is a basic skill required to use computers effectively. 
+People who type quickly can finish work faster. 
+Typing also improves concentration and productivity. 
+Students should learn typing early in their education. 
+Typing tests measure performance and improvement. 
+Daily practice increases speed and accuracy. 
+Consistency and patience are key to mastering typing skills. 
+Anyone can become a good typist with regular practice.`
 
 ]
 
+/* ---------------- Hindi KrutiDev Stories ---------------- */
+
+let hindiTests=[
+
+`dksbZ Hkh O;fDr tc fu;fer vH;kl djrk gS rks mls lQyrk vo'; feyrh gSA
+vH;kl gh lQyrk dh dqath gSA ;fn ge izfrfnuk dke djrs jgs rks ge
+fdlh Hkh {ks= esa lQy gks ldrs gSaA le; dk lgh mi;ksx djuk cgqr
+t:jh gSA thou esa lQyrk izkIr djus ds fy, ifjJe djuk iM+rk gSA`
+
+]
+
+let original=""
+let startTime
+let timer=null
+let timeLeft=0
+let chart
+
+/* ---------------- Load Tests ---------------- */
+
+function loadTests(){
+
+let font=document.getElementById("fontSelect").value
+let select=document.getElementById("testSelect")
+
+select.innerHTML=""
+
+if(font=="Arial"){
+
+englishTests.forEach((t,i)=>{
+select.innerHTML+=`<option value="${i}">English Test ${i+1}</option>`
+})
+
+original=englishTests[0]
+
+}else{
+
+hindiTests.forEach((t,i)=>{
+select.innerHTML+=`<option value="${i}">Hindi Test ${i+1}</option>`
+})
+
+original=hindiTests[0]
+
+}
+
+showHighlight("")
+
+}
+
+loadTests()
+
+/* ---------------- Start Test ---------------- */
+
 function startTest(){
 
-let name=document.getElementById("username").value
+if(timer) clearInterval(timer)
 
-if(name==""){
+let font=document.getElementById("fontSelect").value
+let test=document.getElementById("testSelect").value
 
-alert("Enter Name")
+document.getElementById("highlight").style.fontFamily=font
+document.getElementById("typingArea").style.fontFamily=font
 
+original=(font=="Arial")?englishTests[test]:hindiTests[test]
+
+document.getElementById("typingArea").value=""
+
+timeLeft=parseInt(document.getElementById("timeSelect").value)
+
+startTime=new Date()
+
+timer=setInterval(()=>{
+
+if(timeLeft<=0){
+
+finishTest()
 return
 
 }
 
-document.getElementById("login").style.display="none"
-
-document.getElementById("test").style.display="block"
-
-document.getElementById("welcome").innerText="Welcome "+name
-
-let font=document.getElementById("fontSelect").value
-
-document.getElementById("typingArea").style.fontFamily=font
-document.getElementById("storyBox").style.fontFamily=font
-document.getElementById("highlight").style.fontFamily=font
-
-timeLeft=document.getElementById("timeSelect").value*60
-
-startTimer()
-
-loadStories()
-
-loadLeaderboard()
-
-}
-
-function startTimer(){
-
-document.getElementById("timer").innerText="Time Left "+timeLeft
-
-timerInterval=setInterval(function(){
-
 timeLeft--
 
-document.getElementById("timer").innerText="Time Left "+timeLeft
-
-if(timeLeft<=0){
-
-clearInterval(timerInterval)
-
-finishTest()
-
-}
+document.getElementById("timer").innerText="Time "+timeLeft
 
 },1000)
 
-}
-
-function loadStories(){
-
-let list=document.getElementById("storyList")
-
-stories.forEach((text,index)=>{
-
-let btn=document.createElement("button")
-
-btn.innerText="Story "+(index+1)
-
-btn.className="storyBtn"
-
-btn.onclick=function(){
-
-originalText=text
-
-document.getElementById("storyBox").innerText=text
-
-document.getElementById("highlight").innerHTML=text
-
-document.getElementById("typingArea").value=""
-
-startTime=new Date()
+showHighlight("")
 
 }
 
-list.appendChild(btn)
-
-})
-
-}
+/* ---------------- Typing Event ---------------- */
 
 document.getElementById("typingArea").addEventListener("input",function(){
 
 let typed=this.value
 
-let result=""
-
-let correct=0
-
-for(let i=0;i<originalText.length;i++){
-
-if(typed[i]==null){
-
-result+=originalText[i]
-
-}
-
-else if(typed[i]==originalText[i]){
-
-result+="<span class='correct'>"+originalText[i]+"</span>"
-
-correct++
-
-}
-
-else{
-
-result+="<span class='wrong'>"+originalText[i]+"</span>"
-
-}
-
-}
-
-document.getElementById("highlight").innerHTML=result
+showHighlight(typed)
 
 let minutes=(new Date()-startTime)/60000
 
@@ -368,118 +304,113 @@ if(!isFinite(speed)) speed=0
 
 document.getElementById("wpm").innerText=speed+" WPM"
 
-let acc=Math.round((correct/originalText.length)*100)
+updateGraph(speed)
+
+})
+
+/* ---------------- Highlight ---------------- */
+
+function showHighlight(typed){
+
+let result=""
+let correct=0
+
+for(let i=0;i<original.length;i++){
+
+if(i<typed.length){
+
+if(typed[i]==original[i]){
+
+result+=`<span class="correct">${original[i]}</span>`
+correct++
+
+}else{
+
+result+=`<span class="wrong">${original[i]}</span>`
+
+}
+
+}else{
+
+result+=original[i]
+
+}
+
+}
+
+document.getElementById("highlight").innerHTML=result
+
+let acc=Math.round((correct/original.length)*100)
 
 document.getElementById("accuracy").innerText="Accuracy "+acc+"%"
 
-drawSpeed(speed)
-
-})
-
-function drawSpeed(speed){
-
-let canvas=document.getElementById("speedometer")
-
-let ctx=canvas.getContext("2d")
-
-ctx.clearRect(0,0,200,200)
-
-ctx.beginPath()
-
-ctx.arc(100,100,80,0,Math.PI*2)
-
-ctx.strokeStyle="#555"
-
-ctx.lineWidth=10
-
-ctx.stroke()
-
-let angle=(speed/120)*Math.PI
-
-ctx.beginPath()
-
-ctx.arc(100,100,80,Math.PI,Math.PI+angle)
-
-ctx.strokeStyle="lime"
-
-ctx.lineWidth=10
-
-ctx.stroke()
-
-ctx.fillStyle="white"
-
-ctx.font="20px Arial"
-
-ctx.fillText(speed+" WPM",60,110)
-
 }
+
+/* ---------------- Finish Test ---------------- */
 
 function finishTest(){
 
-clearInterval(timerInterval)
+clearInterval(timer)
+timer=null
 
-let name=document.getElementById("username").value
-
-let speed=parseInt(document.getElementById("wpm").innerText)
-
-saveScore(name,speed)
-
-downloadPDF(name,speed)
-
-loadLeaderboard()
+alert("Test Finished")
 
 }
 
-function saveScore(name,speed){
+/* ---------------- Bar Graph ---------------- */
 
-let scores=JSON.parse(localStorage.getItem("scores")||"[]")
+function updateGraph(speed){
 
-scores.push({name:name,speed:speed})
+let ctx=document.getElementById("graph")
 
-scores.sort((a,b)=>b.speed-a.speed)
+if(!chart){
 
-scores=scores.slice(0,5)
-
-localStorage.setItem("scores",JSON.stringify(scores))
-
+chart=new Chart(ctx,{
+type:'bar',
+data:{
+labels:["Speed"],
+datasets:[{
+label:"WPM",
+data:[speed],
+backgroundColor:"#4b6cff"
+}]
+},
+options:{
+responsive:true,
+scales:{
+y:{beginAtZero:true}
 }
-
-function loadLeaderboard(){
-
-let scores=JSON.parse(localStorage.getItem("scores")||"[]")
-
-let html=""
-
-scores.forEach(s=>{
-
-html+=s.name+" - "+s.speed+" WPM<br>"
-
+}
 })
 
-document.getElementById("scores").innerHTML=html
+}else{
+
+chart.data.datasets[0].data=[speed]
+chart.update()
 
 }
 
-function downloadPDF(name,speed){
+}
 
-const { jsPDF } = window.jspdf
+/* ---------------- PDF ---------------- */
 
-let doc=new jsPDF()
+function downloadPDF(){
 
-doc.text("Typing Test Result",20,20)
+const {jsPDF}=window.jspdf
 
-doc.text("Name: "+name,20,40)
+let pdf=new jsPDF()
 
-doc.text("Speed: "+speed+" WPM",20,60)
+pdf.text("Typing Test Report",20,20)
+pdf.text("User: "+document.getElementById("username").value,20,40)
+pdf.text("Speed: "+document.getElementById("wpm").innerText,20,60)
+pdf.text("Accuracy: "+document.getElementById("accuracy").innerText,20,80)
 
-doc.text("Date: "+new Date().toLocaleDateString(),20,80)
-
-doc.save(name+"_typing_result.pdf")
+pdf.save("typing-report.pdf")
 
 }
 
 </script>
 
 </body>
-
 </html>
+```
