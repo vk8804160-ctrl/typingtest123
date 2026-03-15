@@ -4,20 +4,20 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>JR Typing Tutor</title>
 
 <style>
+
+@font-face{
+font-family:"KrutiDev";
+src:url("KrutiDev010.ttf");
+}
 
 body{
 font-family:Arial;
 background:#eef1f7;
 margin:0;
 padding:15px;
-}
-
-h2{
-margin-top:0;
 }
 
 .container{
@@ -57,7 +57,6 @@ width:100%;
 height:150px;
 font-size:18px;
 padding:10px;
-box-sizing:border-box;
 border-radius:6px;
 }
 
@@ -78,13 +77,8 @@ margin:4px 0;
 background:#333;
 }
 
-.correct{
-color:green;
-}
-
-.wrong{
-color:red;
-}
+.correct{color:green;}
+.wrong{color:red;}
 
 canvas{
 background:#111;
@@ -92,20 +86,9 @@ border-radius:50%;
 margin-top:10px;
 }
 
-@media(max-width:850px){
-
-.container{
-flex-direction:column;
-}
-
-.right{
-width:100%;
-}
-
-canvas{
-margin:auto;
-}
-
+select{
+padding:8px;
+margin:5px;
 }
 
 </style>
@@ -122,10 +105,34 @@ margin:auto;
 
 <br><br>
 
+<label>Font Select</label>
+
+<select id="fontSelect">
+
+<option value="KrutiDev">KrutiDev 010</option>
+<option value="Mangal">Mangal</option>
+<option value="Times New Roman">Times New Roman</option>
+
+</select>
+
+<br>
+
+<label>Timer</label>
+
+<select id="timeSelect">
+
+<option value="1">1 Minute</option>
+<option value="2">2 Minute</option>
+<option value="5">5 Minute</option>
+<option value="10">10 Minute</option>
+
+</select>
+
+<br><br>
+
 <button onclick="startTest()">Start Test</button>
 
 </div>
-
 
 <div id="test" style="display:none">
 
@@ -145,7 +152,6 @@ margin:auto;
 
 </div>
 
-
 <div class="right">
 
 <canvas id="speedometer" width="200" height="200"></canvas>
@@ -153,6 +159,8 @@ margin:auto;
 <h3 id="wpm">0 WPM</h3>
 
 <h4 id="accuracy">Accuracy 100%</h4>
+
+<h4 id="timer"></h4>
 
 <div id="storyList"></div>
 
@@ -162,13 +170,14 @@ margin:auto;
 
 </div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
 let startTime
 let originalText=""
+let timer
+let timeLeft
 
 const stories=[
 
@@ -180,43 +189,61 @@ const stories=[
 
 "Technology makes life easier.",
 
-"Programming builds amazing software.",
-
-"Success comes from dedication.",
-
-"Learning never stops.",
-
-"Practice typing everyday to improve.",
-
-"India is growing rapidly in technology.",
-
-"Education changes the future."
+"Programming builds amazing software."
 
 ]
-
 
 function startTest(){
 
 let name=document.getElementById("username").value
 
 if(name==""){
-
 alert("Enter Name")
-
 return
-
 }
 
 document.getElementById("login").style.display="none"
-
 document.getElementById("test").style.display="block"
 
 document.getElementById("welcome").innerText="Welcome "+name
+
+let font=document.getElementById("fontSelect").value
+
+document.getElementById("typingArea").style.fontFamily=font
+document.getElementById("storyBox").style.fontFamily=font
+document.getElementById("highlight").style.fontFamily=font
+
+let time=document.getElementById("timeSelect").value
+
+timeLeft=time*60
+
+startTimer()
 
 loadStories()
 
 }
 
+function startTimer(){
+
+document.getElementById("timer").innerText="Time Left "+timeLeft+" sec"
+
+timer=setInterval(function(){
+
+timeLeft--
+
+document.getElementById("timer").innerText="Time Left "+timeLeft+" sec"
+
+if(timeLeft<=0){
+
+clearInterval(timer)
+
+finishTest()
+
+}
+
+},1000)
+
+}
 
 function loadStories(){
 
@@ -235,7 +262,6 @@ btn.onclick=function(){
 originalText=text
 
 document.getElementById("storyBox").innerText=text
-
 document.getElementById("highlight").innerHTML=text
 
 document.getElementById("typingArea").value=""
@@ -250,13 +276,11 @@ list.appendChild(btn)
 
 }
 
-
 document.getElementById("typingArea").addEventListener("input",function(){
 
 let typed=this.value
 
 let result=""
-
 let correct=0
 
 for(let i=0;i<originalText.length;i++){
@@ -305,7 +329,6 @@ drawSpeed(speed)
 
 })
 
-
 function drawSpeed(speed){
 
 let canvas=document.getElementById("speedometer")
@@ -319,9 +342,7 @@ ctx.beginPath()
 ctx.arc(100,100,80,0,Math.PI*2)
 
 ctx.strokeStyle="#555"
-
 ctx.lineWidth=10
-
 ctx.stroke()
 
 let angle=(speed/120)*Math.PI
@@ -331,43 +352,33 @@ ctx.beginPath()
 ctx.arc(100,100,80,Math.PI,Math.PI+angle)
 
 ctx.strokeStyle="lime"
-
 ctx.lineWidth=10
-
 ctx.stroke()
 
 ctx.fillStyle="white"
-
 ctx.font="20px Arial"
-
 ctx.fillText(speed+" WPM",60,110)
 
 }
 
-
 function finishTest(){
 
-let name=document.getElementById("username").value
+clearInterval(timer)
 
+let name=document.getElementById("username").value
 let speed=document.getElementById("wpm").innerText
 
 const { jsPDF } = window.jspdf
 
 let doc=new jsPDF()
 
-doc.setFontSize(22)
-
 doc.text("Typing Test Result",20,20)
 
-doc.setFontSize(14)
+doc.text("Name: "+name,20,40)
 
-doc.text("Name: "+name,20,50)
+doc.text("Speed: "+speed,20,60)
 
-doc.text("Speed: "+speed,20,70)
-
-doc.text("Date: "+new Date().toLocaleDateString(),20,90)
-
-doc.save(name+"_typing_result.pdf")
+doc.save(name+"_result.pdf")
 
 }
 
