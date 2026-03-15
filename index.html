@@ -1,108 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title> VIKAS TYPING TUTOR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>VIKAS TYPING TUTOR</title>
 
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 background:#f4f6fb;
-padding:20px;
 margin:0;
+padding:10px;
 }
 
 .container{
 display:flex;
-gap:20px;
 flex-wrap:wrap;
+gap:15px;
 }
 
 .left{
-width:70%;
+flex:1;
+min-width:300px;
 }
 
 .right{
-width:30%;
+width:260px;
+text-align:center;
 }
 
 textarea{
 width:100%;
-height:160px;
+height:150px;
 font-size:18px;
 padding:10px;
 box-sizing:border-box;
 }
 
 button{
-padding:10px 20px;
+padding:10px 15px;
 margin-top:10px;
 cursor:pointer;
 }
 
 .storyBtn{
 display:block;
-margin:5px 0;
+margin:4px 0;
 width:100%;
 }
 
 canvas{
 background:#111;
 border-radius:50%;
-max-width:100%;
+margin-top:10px;
 }
 
-select{
-padding:8px;
-margin:5px;
+#storyBox{
+background:white;
+padding:10px;
+margin-bottom:10px;
+min-height:60px;
 }
 
-/* Tablet */
+.correct{
+color:green;
+}
 
-@media (max-width: 900px){
+.wrong{
+color:red;
+}
 
-.left{
-width:100%;
+@media(max-width:900px){
+
+.container{
+flex-direction:column;
 }
 
 .right{
 width:100%;
 }
 
-.container{
-flex-direction:column;
+canvas{
+margin:auto;
 }
 
 }
 
-/* Mobile */
-
-@media (max-width: 600px){
-
-body{
-padding:10px;
-}
-
-h2{
-font-size:20px;
-}
-
-textarea{
-height:140px;
-font-size:16px;
-}
-
-button{
-width:100%;
-}
-
-select{
-width:100%;
-}
-
-}
 </style>
 
 </head>
@@ -124,20 +109,10 @@ width:100%;
 
 <h2 id="welcome"></h2>
 
-<select id="font">
-<option value="Kruti Dev 010">KrutiDev</option>
-<option value="Remington">Remington</option>
-<option value="Mangal">Mangal</option>
-<option value="Times New Roman">Times New Roman</option>
-<option value="Arial">Unicode</option>
-</select>
-
 <select id="time">
 <option value="1">1 Minute</option>
 <option value="2">2 Minute</option>
 <option value="5">5 Minute</option>
-<option value="10">10 Minute</option>
-<option value="20">20 Minute</option>
 </select>
 
 <div class="container">
@@ -145,6 +120,8 @@ width:100%;
 <div class="left">
 
 <p id="storyBox"></p>
+
+<div id="highlight"></div>
 
 <textarea id="typingArea"></textarea>
 
@@ -156,6 +133,10 @@ width:100%;
 
 <canvas id="speed" width="200" height="200"></canvas>
 
+<h3 id="liveSpeed">0 WPM</h3>
+
+<h4 id="accuracy">Accuracy: 100%</h4>
+
 <div id="storyList"></div>
 
 </div>
@@ -164,12 +145,13 @@ width:100%;
 
 </div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
 let startTime;
+let timer;
+let originalText="";
 
 const stories=[
 
@@ -187,51 +169,22 @@ const stories=[
 
 "Learning never stops.",
 
-"Practice typing everyday to improve.",
-
-"India is growing rapidly in technology.",
-
-"Education changes the future.",
-
-"Keyboard typing helps office work.",
-
-"Data entry jobs need fast typing.",
-
-"Computers are essential today.",
-
-"Typing websites help students.",
-
-"JavaScript makes websites interactive.",
-
-"HTML builds webpage structure.",
-
-"CSS designs the layout.",
-
-"Speed and accuracy both matter.",
-
-"Focus improves performance.",
-
-"Consistency leads to mastery."
+"Practice typing everyday to improve."
 
 ];
-
 
 function start(){
 
 let name=document.getElementById("username").value;
 
 document.getElementById("login").style.display="none";
-
 document.getElementById("test").style.display="block";
 
 document.getElementById("welcome").innerText="Welcome "+name;
 
-startTime=new Date();
-
 loadStories();
 
 }
-
 
 function loadStories(){
 
@@ -242,12 +195,17 @@ stories.forEach((s,i)=>{
 let btn=document.createElement("button");
 
 btn.innerText="Story "+(i+1);
-
 btn.className="storyBtn";
 
 btn.onclick=()=>{
 
+originalText=s;
+
 document.getElementById("storyBox").innerText=s;
+
+document.getElementById("highlight").innerHTML=s;
+
+startTime=new Date();
 
 };
 
@@ -257,6 +215,83 @@ list.appendChild(btn);
 
 }
 
+document.getElementById("typingArea").addEventListener("input",function(){
+
+let text=this.value;
+
+let result="";
+let correct=0;
+
+for(let i=0;i<originalText.length;i++){
+
+if(text[i]==null){
+
+result+="<span>"+originalText[i]+"</span>";
+
+}
+
+else if(text[i]==originalText[i]){
+
+result+="<span class='correct'>"+originalText[i]+"</span>";
+correct++;
+
+}
+
+else{
+
+result+="<span class='wrong'>"+originalText[i]+"</span>";
+
+}
+
+}
+
+document.getElementById("highlight").innerHTML=result;
+
+let end=new Date();
+
+let minutes=(end-startTime)/60000;
+
+let words=text.split(" ").length;
+
+let speed=Math.round(words/minutes);
+
+document.getElementById("liveSpeed").innerText=speed+" WPM";
+
+let accuracy=Math.round((correct/originalText.length)*100);
+
+document.getElementById("accuracy").innerText="Accuracy: "+accuracy+"%";
+
+drawSpeed(speed);
+
+});
+
+function drawSpeed(speed){
+
+let c=document.getElementById("speed");
+
+let ctx=c.getContext("2d");
+
+ctx.clearRect(0,0,200,200);
+
+ctx.beginPath();
+ctx.arc(100,100,80,0,Math.PI*2);
+ctx.strokeStyle="#444";
+ctx.lineWidth=10;
+ctx.stroke();
+
+let angle=(speed/120)*Math.PI;
+
+ctx.beginPath();
+ctx.arc(100,100,80,Math.PI,Math.PI+angle);
+ctx.strokeStyle="lime";
+ctx.lineWidth=10;
+ctx.stroke();
+
+ctx.fillStyle="white";
+ctx.font="20px Arial";
+ctx.fillText(speed+" WPM",60,110);
+
+}
 
 function finish(){
 
@@ -270,45 +305,31 @@ let words=text.split(" ").length;
 
 let speed=Math.round(words/minutes);
 
-drawSpeed(speed);
-
 generatePDF(speed);
 
 }
-
-
-function drawSpeed(speed){
-
-let c=document.getElementById("speed");
-
-let ctx=c.getContext("2d");
-
-ctx.clearRect(0,0,200,200);
-
-ctx.fillStyle="white";
-
-ctx.font="30px Arial";
-
-ctx.fillText(speed+" WPM",40,110);
-
-}
-
 
 function generatePDF(speed){
 
 const { jsPDF } = window.jspdf;
 
+let name=document.getElementById("username").value;
+
+let date=new Date().toLocaleDateString();
+
 let doc=new jsPDF();
 
 doc.setFontSize(22);
-
 doc.text("Typing Test Result",20,20);
 
 doc.setFontSize(14);
+doc.text("Name: "+name,20,40);
 
-doc.text("Speed: "+speed+" WPM",20,40);
+doc.text("Speed: "+speed+" WPM",20,60);
 
-doc.save("typing-result.pdf");
+doc.text("Date: "+date,20,80);
+
+doc.save(name+"-typing-result.pdf");
 
 }
 
