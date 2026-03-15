@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>VIKAS TYPING TUTOR</title>
+<title>JR Typing Tutor</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f4f6fb;
+background:#eef1f7;
 margin:0;
-padding:10px;
+padding:15px;
+}
+
+h2{
+margin-top:0;
 }
 
 .container{
 display:flex;
 flex-wrap:wrap;
-gap:15px;
+gap:20px;
 }
 
 .left{
@@ -31,37 +36,46 @@ width:260px;
 text-align:center;
 }
 
+#storyBox{
+background:white;
+padding:10px;
+min-height:70px;
+margin-bottom:10px;
+border-radius:6px;
+}
+
+#highlight{
+background:white;
+padding:10px;
+min-height:70px;
+border-radius:6px;
+margin-bottom:10px;
+}
+
 textarea{
 width:100%;
 height:150px;
 font-size:18px;
 padding:10px;
 box-sizing:border-box;
+border-radius:6px;
 }
 
 button{
 padding:10px 15px;
 margin-top:10px;
 cursor:pointer;
+border:none;
+background:#4b6cff;
+color:white;
+border-radius:5px;
 }
 
 .storyBtn{
 display:block;
-margin:4px 0;
 width:100%;
-}
-
-canvas{
-background:#111;
-border-radius:50%;
-margin-top:10px;
-}
-
-#storyBox{
-background:white;
-padding:10px;
-margin-bottom:10px;
-min-height:60px;
+margin:4px 0;
+background:#333;
 }
 
 .correct{
@@ -72,7 +86,13 @@ color:green;
 color:red;
 }
 
-@media(max-width:900px){
+canvas{
+background:#111;
+border-radius:50%;
+margin-top:10px;
+}
+
+@media(max-width:850px){
 
 .container{
 flex-direction:column;
@@ -100,7 +120,9 @@ margin:auto;
 
 <input type="text" id="username" placeholder="Enter name">
 
-<button onclick="start()">Start Test</button>
+<br><br>
+
+<button onclick="startTest()">Start Test</button>
 
 </div>
 
@@ -109,33 +131,28 @@ margin:auto;
 
 <h2 id="welcome"></h2>
 
-<select id="time">
-<option value="1">1 Minute</option>
-<option value="2">2 Minute</option>
-<option value="5">5 Minute</option>
-</select>
-
 <div class="container">
 
 <div class="left">
 
-<p id="storyBox"></p>
+<div id="storyBox"></div>
 
 <div id="highlight"></div>
 
 <textarea id="typingArea"></textarea>
 
-<button onclick="finish()">Finish</button>
+<button onclick="finishTest()">Finish Test</button>
 
 </div>
 
+
 <div class="right">
 
-<canvas id="speed" width="200" height="200"></canvas>
+<canvas id="speedometer" width="200" height="200"></canvas>
 
-<h3 id="liveSpeed">0 WPM</h3>
+<h3 id="wpm">0 WPM</h3>
 
-<h4 id="accuracy">Accuracy: 100%</h4>
+<h4 id="accuracy">Accuracy 100%</h4>
 
 <div id="storyList"></div>
 
@@ -145,13 +162,13 @@ margin:auto;
 
 </div>
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
-let startTime;
-let timer;
-let originalText="";
+let startTime
+let originalText=""
 
 const stories=[
 
@@ -169,171 +186,193 @@ const stories=[
 
 "Learning never stops.",
 
-"Practice typing everyday to improve."
+"Practice typing everyday to improve.",
 
-];
+"India is growing rapidly in technology.",
 
-function start(){
+"Education changes the future."
 
-let name=document.getElementById("username").value;
+]
 
-document.getElementById("login").style.display="none";
-document.getElementById("test").style.display="block";
 
-document.getElementById("welcome").innerText="Welcome "+name;
+function startTest(){
 
-loadStories();
+let name=document.getElementById("username").value
+
+if(name==""){
+
+alert("Enter Name")
+
+return
 
 }
+
+document.getElementById("login").style.display="none"
+
+document.getElementById("test").style.display="block"
+
+document.getElementById("welcome").innerText="Welcome "+name
+
+loadStories()
+
+}
+
 
 function loadStories(){
 
-let list=document.getElementById("storyList");
+let list=document.getElementById("storyList")
 
-stories.forEach((s,i)=>{
+stories.forEach((text,index)=>{
 
-let btn=document.createElement("button");
+let btn=document.createElement("button")
 
-btn.innerText="Story "+(i+1);
-btn.className="storyBtn";
+btn.innerText="Story "+(index+1)
 
-btn.onclick=()=>{
+btn.className="storyBtn"
 
-originalText=s;
+btn.onclick=function(){
 
-document.getElementById("storyBox").innerText=s;
+originalText=text
 
-document.getElementById("highlight").innerHTML=s;
+document.getElementById("storyBox").innerText=text
 
-startTime=new Date();
+document.getElementById("highlight").innerHTML=text
 
-};
+document.getElementById("typingArea").value=""
 
-list.appendChild(btn);
-
-});
+startTime=new Date()
 
 }
+
+list.appendChild(btn)
+
+})
+
+}
+
 
 document.getElementById("typingArea").addEventListener("input",function(){
 
-let text=this.value;
+let typed=this.value
 
-let result="";
-let correct=0;
+let result=""
+
+let correct=0
 
 for(let i=0;i<originalText.length;i++){
 
-if(text[i]==null){
+if(typed[i]==null){
 
-result+="<span>"+originalText[i]+"</span>";
+result+=originalText[i]
 
 }
 
-else if(text[i]==originalText[i]){
+else if(typed[i]==originalText[i]){
 
-result+="<span class='correct'>"+originalText[i]+"</span>";
-correct++;
+result+="<span class='correct'>"+originalText[i]+"</span>"
+
+correct++
 
 }
 
 else{
 
-result+="<span class='wrong'>"+originalText[i]+"</span>";
+result+="<span class='wrong'>"+originalText[i]+"</span>"
 
 }
 
 }
 
-document.getElementById("highlight").innerHTML=result;
+document.getElementById("highlight").innerHTML=result
 
-let end=new Date();
+let endTime=new Date()
 
-let minutes=(end-startTime)/60000;
+let minutes=(endTime-startTime)/60000
 
-let words=text.split(" ").length;
+let words=typed.split(" ").length
 
-let speed=Math.round(words/minutes);
+let speed=Math.round(words/minutes)
 
-document.getElementById("liveSpeed").innerText=speed+" WPM";
+if(speed<0) speed=0
 
-let accuracy=Math.round((correct/originalText.length)*100);
+document.getElementById("wpm").innerText=speed+" WPM"
 
-document.getElementById("accuracy").innerText="Accuracy: "+accuracy+"%";
+let acc=Math.round((correct/originalText.length)*100)
 
-drawSpeed(speed);
+document.getElementById("accuracy").innerText="Accuracy "+acc+"%"
 
-});
+drawSpeed(speed)
+
+})
+
 
 function drawSpeed(speed){
 
-let c=document.getElementById("speed");
+let canvas=document.getElementById("speedometer")
 
-let ctx=c.getContext("2d");
+let ctx=canvas.getContext("2d")
 
-ctx.clearRect(0,0,200,200);
+ctx.clearRect(0,0,200,200)
 
-ctx.beginPath();
-ctx.arc(100,100,80,0,Math.PI*2);
-ctx.strokeStyle="#444";
-ctx.lineWidth=10;
-ctx.stroke();
+ctx.beginPath()
 
-let angle=(speed/120)*Math.PI;
+ctx.arc(100,100,80,0,Math.PI*2)
 
-ctx.beginPath();
-ctx.arc(100,100,80,Math.PI,Math.PI+angle);
-ctx.strokeStyle="lime";
-ctx.lineWidth=10;
-ctx.stroke();
+ctx.strokeStyle="#555"
 
-ctx.fillStyle="white";
-ctx.font="20px Arial";
-ctx.fillText(speed+" WPM",60,110);
+ctx.lineWidth=10
 
-}
+ctx.stroke()
 
-function finish(){
+let angle=(speed/120)*Math.PI
 
-let text=document.getElementById("typingArea").value;
+ctx.beginPath()
 
-let end=new Date();
+ctx.arc(100,100,80,Math.PI,Math.PI+angle)
 
-let minutes=(end-startTime)/60000;
+ctx.strokeStyle="lime"
 
-let words=text.split(" ").length;
+ctx.lineWidth=10
 
-let speed=Math.round(words/minutes);
+ctx.stroke()
 
-generatePDF(speed);
+ctx.fillStyle="white"
+
+ctx.font="20px Arial"
+
+ctx.fillText(speed+" WPM",60,110)
 
 }
 
-function generatePDF(speed){
 
-const { jsPDF } = window.jspdf;
+function finishTest(){
 
-let name=document.getElementById("username").value;
+let name=document.getElementById("username").value
 
-let date=new Date().toLocaleDateString();
+let speed=document.getElementById("wpm").innerText
 
-let doc=new jsPDF();
+const { jsPDF } = window.jspdf
 
-doc.setFontSize(22);
-doc.text("Typing Test Result",20,20);
+let doc=new jsPDF()
 
-doc.setFontSize(14);
-doc.text("Name: "+name,20,40);
+doc.setFontSize(22)
 
-doc.text("Speed: "+speed+" WPM",20,60);
+doc.text("Typing Test Result",20,20)
 
-doc.text("Date: "+date,20,80);
+doc.setFontSize(14)
 
-doc.save(name+"-typing-result.pdf");
+doc.text("Name: "+name,20,50)
+
+doc.text("Speed: "+speed,20,70)
+
+doc.text("Date: "+new Date().toLocaleDateString(),20,90)
+
+doc.save(name+"_typing_result.pdf")
 
 }
 
 </script>
 
 </body>
+
 </html>
