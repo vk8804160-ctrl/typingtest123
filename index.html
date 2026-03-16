@@ -1,416 +1,238 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JR Typing System</title>
-
+<title>vikash typing Tutor</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
+@font-face { font-family: "KrutiDev"; src: url("fonts/KrutiDev010.ttf") format("truetype"); }
 
-@font-face{
-font-family:"KrutiDev";
-src:url("KrutiDev010.ttf") format("truetype");
-font-display:swap;
-}
+:root { --bg-color:#f4f6fb; --text-color:#222; --nav-bg:#4b6cff; --nav-text:white; --correct-color:#b8ffb8; --wrong-color:#ffb8b8;}
+body.dark { --bg-color:#1f1f1f; --text-color:#eee; --nav-bg:#222; --nav-text:#fff; --correct-color:#28a74566; --wrong-color:#dc354566;}
 
-body{
-font-family:Arial;
-background:#eef1f7;
-padding:15px;
-margin:0;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);transition:0.3s;}
 
-h2{
-text-align:center;
-}
+nav{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:var(--nav-bg);color:var(--nav-text);flex-wrap:wrap;}
+nav .logo{font-weight:bold;font-size:22px;}
+nav ul{list-style:none;display:flex;gap:10px;flex-wrap:wrap;}
+nav ul li{cursor:pointer;padding:5px 10px;border-radius:5px;transition:0.2s;}
+nav ul li:hover{background:rgba(255,255,255,0.2);}
+nav .controls{display:flex;gap:10px;margin-top:5px;}
+select,button{padding:5px 10px;border-radius:5px;border:none;cursor:pointer;}
+.toggle-btn{border:1px solid #ccc;}
 
-.container{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-}
+main{padding:20px;}
+.page{display:none;}
+.page.active{display:block;}
+#highlight{background:white;padding:15px;border-radius:6px;font-size:18px;min-height:120px;border:1px solid #ccc;margin-bottom:10px;}
+#typingArea{width:100%;height:120px;font-size:18px;padding:10px;border-radius:6px;}
+.correct{background:var(--correct-color);}
+.wrong{background:var(--wrong-color);}
+#downloadPdfBtn{margin-top:20px;padding:10px 15px;background:#4b6cff;color:white;border-radius:5px;}
+#leaderboard{margin-top:20px;}
+table{width:100%;border-collapse:collapse;}
+table,th,td{border:1px solid #ccc;}
+th,td{padding:5px;text-align:left;}
 
-.left{
-flex:1;
-min-width:300px;
-}
-
-.right{
-width:300px;
-background:white;
-padding:15px;
-border-radius:8px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-#highlight{
-background:white;
-padding:15px;
-border-radius:6px;
-font-size:20px;
-min-height:120px;
-border:1px solid #ccc;
-line-height:32px;
-}
-
-#typingArea{
-width:100%;
-height:160px;
-font-size:20px;
-padding:10px;
-margin-top:10px;
-border-radius:6px;
-resize:none;
-border:1px solid #ccc;
-}
-
-button{
-padding:10px 15px;
-margin:5px;
-background:#4b6cff;
-border:none;
-color:white;
-cursor:pointer;
-border-radius:5px;
-}
-
-.correct{
-background:#b8ffb8;
-}
-
-.wrong{
-background:#ffb8b8;
-}
-
-#graph{
-margin-top:20px;
-}
-
-.controls{
-text-align:center;
-margin-bottom:15px;
-}
-
-input,select{
-padding:6px;
-margin:4px;
-}
-
-@media(max-width:768px){
-
-.container{
-flex-direction:column;
-}
-
-.right{
-width:100%;
-}
-
-}
-
+@media(max-width:768px){nav{flex-direction:column;align-items:flex-start;} nav .controls{margin-top:10px;}}
+@media(max-width:480px){nav .logo{font-size:18px;} nav ul li{padding:5px 8px;font-size:14px;} main{padding:10px;} #downloadPdfBtn{width:100%;} #typingArea{height:100px;} #highlight{font-size:16px;}}
 </style>
-
 </head>
-
 <body>
-
-<h2>VIKAS Typing Platform</h2>
-
+<nav>
+<div class="logo">vikash typing tutor</div>
+<ul id="navLinks">
+<li data-route="home">Home</li>
+<li data-route="typing">Typing</li>
+<li data-route="about">About</li>
+<li data-route="services">Services</li>
+<li data-route="products">Products</li>
+<li data-route="contact">Contact</li>
+<li data-route="team">Team</li>
+<li data-route="career">Career</li>
+<li data-route="blog">Blog</li>
+<li data-route="support">Support</li>
+</ul>
 <div class="controls">
+<select id="fontSelect"><option value="Arial">English</option><option value="KrutiDev">KrutiDev (Hindi)</option></select>
+<button id="themeToggle" class="toggle-btn">Dark Mode</button>
+</div>
+</nav>
 
-<input id="username" placeholder="Enter Name">
+<main>
+<div id="home" class="page active" data-title="Home" data-description="vikash typing tutor with Home Page">
+<h2>Home</h2><p>Welcome to vikash Typing platform with Leaderboard.</p></div>
 
-<select id="fontSelect" onchange="loadTests()">
-<option value="Arial">English</option>
-<option value="KrutiDev">KrutiDev</option>
-</select>
-
+<div id="typing" class="page" data-title="Typing Test" data-description="Practice typing here">
+<h2>Typing Test</h2>
+<input id="username" placeholder="Enter Name" style="margin-bottom:10px;">
 <select id="testSelect"></select>
-
-<select id="timeSelect">
-<option value="60">1 Minute</option>
-<option value="120">2 Minute</option>
-<option value="300">5 Minute</option>
-</select>
-
-<br>
-
+<select id="timeSelect"><option value="60">1 Minute</option><option value="120">2 Minute</option><option value="300">5 Minute</option></select>
 <button onclick="startTest()">Start</button>
 <button onclick="finishTest()">Finish</button>
-<button onclick="downloadPDF()">Download PDF</button>
-
-</div>
-
-<div class="container">
-
-<div class="left">
 
 <div id="highlight"></div>
-
-<textarea id="typingArea"></textarea>
-
-</div>
-
-<div class="right">
+<textarea id="typingArea" placeholder="Start typing here..."></textarea>
 
 <h3 id="timer">Time 0</h3>
 <h3 id="wpm">0 WPM</h3>
 <h3 id="accuracy">Accuracy 100%</h3>
 
 <canvas id="graph"></canvas>
+<button id="downloadPdfBtn">Download PDF</button>
 
+<div id="leaderboard"><h3>Leaderboard</h3><table><thead><tr><th>User</th><th>WPM</th><th>Accuracy</th></tr></thead><tbody id="leaderboardBody"></tbody></table></div>
 </div>
 
-</div>
+<div id="about" class="page" data-title="About" data-description="About Page Content"><h2>About</h2><p>About us page.</p></div>
+<div id="services" class="page" data-title="Services" data-description="Services Page Content"><h2>Services</h2><p>Services offered.</p></div>
+<div id="products" class="page" data-title="Products" data-description="Products Page Content"><h2>Products</h2><p>Our products.</p></div>
+<div id="contact" class="page" data-title="Contact" data-description="Contact Page Content"><h2>Contact</h2><p>Contact info.</p></div>
+<div id="team" class="page" data-title="Team" data-description="Team Page Content"><h2>Team</h2><p>Meet the team.</p></div>
+<div id="career" class="page" data-title="Career" data-description="Career Page Content"><h2>Career</h2><p>Career opportunities.</p></div>
+<div id="blog" class="page" data-title="Blog" data-description="Blog Page Content"><h2>Blog</h2><p>Latest articles.</p></div>
+<div id="support" class="page" data-title="Support" data-description="Support Page Content"><h2>Support</h2><p>Support info.</p></div>
+</main>
 
 <script>
+// SPA Routing
+const pages=document.querySelectorAll('.page');
+const navLinks=document.querySelectorAll('#navLinks li');
+const fontSelect=document.getElementById('fontSelect');
+const themeToggle=document.getElementById('themeToggle');
+let currentFont='Arial';
 
-/* ---------------- English Stories ---------------- */
+navLinks.forEach(link=>link.addEventListener('click',()=>showPage(link.dataset.route)));
 
-let englishTests=[
+function showPage(route){
+pages.forEach(p=>p.classList.remove('active'));
+const page=document.getElementById(route); page.classList.add('active');
+document.title=page.dataset.title;
+let meta=document.querySelector('meta[name="description"]');
+if(!meta){ meta=document.createElement('meta'); meta.name='description'; document.head.appendChild(meta);}
+meta.content=page.dataset.description;
+updateLeaderboardDisplay();
+}
 
-`Typing practice is one of the most important skills in the digital world today. 
-Students and professionals use typing every day while working on computers. 
-A person who types faster can complete work quickly and efficiently. 
-Typing tests help measure speed and accuracy. 
-Daily typing practice improves productivity and confidence. 
-Many government and private jobs require typing tests. 
-Accuracy is very important while typing documents. 
-Regular practice helps increase typing speed gradually. 
-Typing is also useful for writing emails, documents, and reports. 
-With consistent effort anyone can improve typing speed and accuracy.`,
+// Theme Toggle
+themeToggle.addEventListener('click',()=>{
+document.body.classList.toggle('dark');
+themeToggle.innerText=document.body.classList.contains('dark')?"Light Mode":"Dark Mode";
+});
 
-`Technology is changing our lives rapidly. 
-Computers and the internet are essential tools today. 
-Typing is a basic skill required to use computers effectively. 
-People who type quickly can finish work faster. 
-Typing also improves concentration and productivity. 
-Students should learn typing early in their education. 
-Typing tests measure performance and improvement. 
-Daily practice increases speed and accuracy. 
-Consistency and patience are key to mastering typing skills. 
-Anyone can become a good typist with regular practice.`
+// Typing Tests
+let englishTests=[`Typing practice is one of the most important skills in the modern digital world. When a person learns typing properly, he can complete work faster and more efficiently. Typing speed improves productivity in offices, schools, and professional work. Many jobs today require basic computer skills and good typing speed. A person who practices typing daily can easily reach a high level of accuracy and speed. Typing is not only about pressing keys quickly but also about maintaining accuracy. Accuracy ensures that the work done is correct and reliable. Students and professionals should practice typing regularly to improve their performance. Typing tests are useful tools to measure speed and accuracy. With continuous practice, anyone can improve typing ability and become more confident while working on computers.`];
 
-]
+let hindiTests=[`dksbZ Hkh O;fDr tc fu;fer vH;kl djrk gS rks mls lQyrk vo'; feyrh gSA vH;kl gh lQyrk dh dqath gSA ;fn ge izfrfnuk dke djrs jgs rks ge fdlh Hkh {ks= esa lQy gks ldrs gSaA le; dk lgh mi;ksx djuk cgqr t:jh gSA thou esa lQyrk izkIr djus ds fy, ifjJe djuk iM+rk gSA`];
 
-/* ---------------- Hindi KrutiDev Stories ---------------- */
+let original="",startTime,timer,timeLeft,chart;
 
-let hindiTests=[
+// Load leaderboard from localStorage
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')||'[]');
+const leaderboardBody=document.getElementById('leaderboardBody');
+function updateLeaderboardDisplay(){
+leaderboardBody.innerHTML="";
+leaderboard.sort((a,b)=>b.wpm-a.wpm).forEach(row=>leaderboardBody.innerHTML+=`<tr><td>${row.user}</td><td>${row.wpm}</td><td>${row.acc}%</td>`);
+}
+updateLeaderboardDisplay();
 
-`dksbZ Hkh O;fDr tc fu;fer vH;kl djrk gS rks mls lQyrk vo'; feyrh gSA
-vH;kl gh lQyrk dh dqath gSA ;fn ge izfrfnuk dke djrs jgs rks ge
-fdlh Hkh {ks= esa lQy gks ldrs gSaA le; dk lgh mi;ksx djuk cgqr
-t:jh gSA thou esa lQyrk izkIr djus ds fy, ifjJe djuk iM+rk gSA`
+function saveLeaderboard(){
+localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
+}
 
-]
-
-let original=""
-let startTime
-let timer=null
-let timeLeft=0
-let chart
-
-/* ---------------- Load Tests ---------------- */
-
+// Load Tests
 function loadTests(){
-
-let font=document.getElementById("fontSelect").value
-let select=document.getElementById("testSelect")
-
-select.innerHTML=""
-
-if(font=="Arial"){
-
-englishTests.forEach((t,i)=>{
-select.innerHTML+=`<option value="${i}">English Test ${i+1}</option>`
-})
-
-original=englishTests[0]
-
-}else{
-
-hindiTests.forEach((t,i)=>{
-select.innerHTML+=`<option value="${i}">Hindi Test ${i+1}</option>`
-})
-
-original=hindiTests[0]
-
+let font=fontSelect.value;
+let select=document.getElementById("testSelect");
+select.innerHTML="";
+if(font=="Arial"){ englishTests.forEach((t,i)=>select.innerHTML+=`<option value="${i}">English Test ${i+1}</option>`); original=englishTests[0]; }
+else{ hindiTests.forEach((t,i)=>select.innerHTML+=`<option value="${i}">Hindi Test ${i+1}</option>`); original=hindiTests[0]; }
 }
+loadTests();
 
-showHighlight("")
-
-}
-
-loadTests()
-
-/* ---------------- Start Test ---------------- */
-
+// Typing Module
 function startTest(){
-
-if(timer) clearInterval(timer)
-
-let font=document.getElementById("fontSelect").value
-let test=document.getElementById("testSelect").value
-
-document.getElementById("highlight").style.fontFamily=font
-document.getElementById("typingArea").style.fontFamily=font
-
-original=(font=="Arial")?englishTests[test]:hindiTests[test]
-
-document.getElementById("typingArea").value=""
-
-timeLeft=parseInt(document.getElementById("timeSelect").value)
-
-startTime=new Date()
-
+let font=fontSelect.value;
+let test=document.getElementById("testSelect").value;
+document.getElementById("highlight").style.fontFamily=(font=="KrutiDev"?"KrutiDev":"Arial");
+document.getElementById("typingArea").style.fontFamily=(font=="KrutiDev"?"KrutiDev":"Arial");
+original=(font=="Arial"?englishTests[test]:hindiTests[test]);
+document.getElementById("typingArea").value="";
+timeLeft=parseInt(document.getElementById("timeSelect").value);
+startTime=new Date();
 timer=setInterval(()=>{
-
-if(timeLeft<=0){
-
-finishTest()
-return
-
+if(timeLeft<=0){clearInterval(timer); finishTest(); return;}
+timeLeft--; document.getElementById("timer").innerText="Time "+timeLeft;
+},1000);
+showHighlight("");
 }
-
-timeLeft--
-
-document.getElementById("timer").innerText="Time "+timeLeft
-
-},1000)
-
-showHighlight("")
-
-}
-
-/* ---------------- Typing Event ---------------- */
 
 document.getElementById("typingArea").addEventListener("input",function(){
-
-let typed=this.value
-
-showHighlight(typed)
-
-let minutes=(new Date()-startTime)/60000
-
-let words=typed.trim().split(/\s+/).length
-
-let speed=Math.round(words/minutes)
-
-if(!isFinite(speed)) speed=0
-
-document.getElementById("wpm").innerText=speed+" WPM"
-
-updateGraph(speed)
-
-})
-
-/* ---------------- Highlight ---------------- */
+let typed=this.value; showHighlight(typed);
+let minutes=(new Date()-startTime)/60000;
+let words=typed.trim().split(/\s+/).length;
+let speed=Math.round(words/minutes); if(!isFinite(speed)) speed=0;
+document.getElementById("wpm").innerText=speed+" WPM";
+updateGraph(speed);
+});
 
 function showHighlight(typed){
-
-let result=""
-let correct=0
-
+let result="",correct=0;
 for(let i=0;i<original.length;i++){
-
 if(i<typed.length){
-
-if(typed[i]==original[i]){
-
-result+=`<span class="correct">${original[i]}</span>`
-correct++
-
-}else{
-
-result+=`<span class="wrong">${original[i]}</span>`
-
+if(typed[i]==original[i]){result+=`<span class="correct">${original[i]}</span>`;correct++;} 
+else{result+=`<span class="wrong">${original[i]}</span>`;}
+}else result+=original[i];
 }
-
-}else{
-
-result+=original[i]
-
+document.getElementById("highlight").innerHTML=result;
+let acc=Math.round((correct/original.length)*100);
+document.getElementById("accuracy").innerText="Accuracy "+acc+"%";
 }
-
-}
-
-document.getElementById("highlight").innerHTML=result
-
-let acc=Math.round((correct/original.length)*100)
-
-document.getElementById("accuracy").innerText="Accuracy "+acc+"%"
-
-}
-
-/* ---------------- Finish Test ---------------- */
 
 function finishTest(){
-
-clearInterval(timer)
-timer=null
-
-alert("Test Finished")
-
+clearInterval(timer); alert("Test Finished");
+let user=document.getElementById("username").value || "Anonymous";
+let wpm=parseInt(document.getElementById("wpm").innerText); 
+let acc=parseInt(document.getElementById("accuracy").innerText);
+leaderboard.push({user,wpm,acc});
+saveLeaderboard();
+updateLeaderboardDisplay();
 }
-
-/* ---------------- Bar Graph ---------------- */
 
 function updateGraph(speed){
-
-let ctx=document.getElementById("graph")
-
-if(!chart){
-
-chart=new Chart(ctx,{
-type:'bar',
-data:{
-labels:["Speed"],
-datasets:[{
-label:"WPM",
-data:[speed],
-backgroundColor:"#4b6cff"
-}]
-},
-options:{
-responsive:true,
-scales:{
-y:{beginAtZero:true}
+let ctx=document.getElementById("graph");
+if(!chart){ chart=new Chart(ctx,{type:'line',data:{labels:["Start"],datasets:[{label:"WPM",data:[speed],borderWidth:3}]},options:{responsive:true,plugins:{legend:{display:true}}}});}
+else{chart.data.datasets[0].data.push(speed); chart.update();}
 }
-}
-})
 
+// PDF Download
+document.getElementById('downloadPdfBtn').addEventListener('click', ()=>{
+const {jsPDF}=window.jspdf; const pdf=new jsPDF();
+const activePage=document.querySelector('.page.active');
+if(activePage.id==='typing'){
+pdf.text("Typing Report",20,20); pdf.text("User: "+document.getElementById("username").value,20,40);
+pdf.text("Speed: "+document.getElementById("wpm").innerText,20,60);
+pdf.text("Accuracy: "+document.getElementById("accuracy").innerText,20,80);
 }else{
-
-chart.data.datasets[0].data=[speed]
-chart.update()
-
+pdf.text(activePage.dataset.title,20,20); let y=40;
+activePage.querySelectorAll('p,h2').forEach(el=>{pdf.text(el.innerText,20,y);y+=10;});
 }
+pdf.save('page-report.pdf');
+});
 
+// Font change only affects typing area
+fontSelect.addEventListener('change',()=>{ 
+const typingPage=document.getElementById('typing');
+if(typingPage.classList.contains('active')){
+const font=fontSelect.value;
+document.getElementById("highlight").style.fontFamily=(font=="KrutiDev"?"KrutiDev":"Arial");
+document.getElementById("typingArea").style.fontFamily=(font=="KrutiDev"?"KrutiDev":"Arial");
 }
-
-/* ---------------- PDF ---------------- */
-
-function downloadPDF(){
-
-const {jsPDF}=window.jspdf
-
-let pdf=new jsPDF()
-
-pdf.text("Typing Test Report",20,20)
-pdf.text("User: "+document.getElementById("username").value,20,40)
-pdf.text("Speed: "+document.getElementById("wpm").innerText,20,60)
-pdf.text("Accuracy: "+document.getElementById("accuracy").innerText,20,80)
-
-pdf.save("typing-report.pdf")
-
-}
-
+loadTests();
+});
 </script>
-
 </body>
 </html>
-```
