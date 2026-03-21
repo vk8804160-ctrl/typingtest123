@@ -1,0 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* KrutiDev Font */
+@font-face {
+  font-family: 'KrutiDev';
+  src: url('fonts/KrutiDev010.ttf');
+}
+
+.krutidev {
+  font-family: 'KrutiDev';
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0f172a;
+  color: white;
+  padding: 15px 20px;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+}
+
+.navbar li {
+  cursor: pointer;
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 75vh;
+}
+
+/* Input */
+.input-box {
+  text-align: center;
+}
+
+.input-box input {
+  padding: 12px;
+  width: 260px;
+  margin: 10px;
+}
+
+.input-box button {
+  padding: 10px 20px;
+}
+
+/* Cards */
+.card {
+  background: white;
+  padding: 20px;
+  margin: 10px;
+  width: 250px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Practice Layout */
+.practice-container {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+.left {
+  width: 20%;
+  background: #ffffff;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.list-item {
+  padding: 10px;
+  background: white;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.active-practice {
+  background: #0f172a;
+  color: white;
+}
+
+.center {
+  width: 50%;
+  padding: 10px;
+}
+
+.right {
+  width: 30%;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Typing Area */
+textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Speedometer */
+#speedometer {
+  display: block;
+  margin: auto;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 10px;
+  background: #eee;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .navbar ul {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 60px;
+    background: #0f172a;
+    width: 200px;
+  }
+
+  .navbar ul.active {
+    display: flex;
+  }
+
+  .practice-container {
+    flex-direction: column;
+  }
+
+  .left, .center, .right {
+    width: 100%;
+  }
+}
